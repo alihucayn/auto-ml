@@ -315,8 +315,8 @@ def render_home():
     cta_col = st.container()
     with cta_col:
         if st.button("Start AutoML Pipeline", type="primary"):
-            st.session_state["nav_page"] = "Upload"
-            st.experimental_rerun()
+            st.session_state["_nav_redirect"] = "Upload"
+            st.rerun()
 
 
 def styled_container():
@@ -356,9 +356,15 @@ def main():
         "Inference",
     ]
 
-    default_page = st.session_state.get("nav_page", "Home")
-    if default_page not in nav_options:
-        default_page = "Home"
+    # Check for redirect from button clicks and update nav_page before widget creation
+    if "_nav_redirect" in st.session_state:
+        redirect_page = st.session_state.pop("_nav_redirect")
+        if redirect_page in nav_options:
+            st.session_state["nav_page"] = redirect_page
+
+    # Initialize nav_page if not set
+    if "nav_page" not in st.session_state:
+        st.session_state["nav_page"] = "Home"
 
     st.title("AutoML System")
 
@@ -366,7 +372,6 @@ def main():
     page = st.sidebar.radio(
         "Go to",
         nav_options,
-        index=nav_options.index(default_page),
         key="nav_page",
     )
 
